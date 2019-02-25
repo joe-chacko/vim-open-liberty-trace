@@ -26,8 +26,10 @@ syn match olThread	/\v\x{8}/					contained				nextgroup=olObjectId	skipwhite
 syn match olThread	/\v\x{8} (id\=\x{8})@!/				contained				nextgroup=olComponent	skipwhite
 syn match olObjectId	/\vid=[^ ]+/					contained				nextgroup=olComponent	skipwhite
 syn match olComponent	/\v[^ ]+/					contained				nextgroup=olLogLevel	skipwhite
+" match log level as a single character
 syn match olLogLevel	/\v[^ ]/					contained				nextgroup=olText	skipwhite
-syn match olLogLevel	/\v[AEIW] [A-Z]{2,5}[0-9]{4}[AEIW]:/		contained	contains=olTrcMsgId	nextgroup=olText	skipwhite
+" alternatively, match log level as a single character followed by a msg id
+syn match olLogLevel	/\v[AEIW] +[A-Z0-9]{2,5}[0-9]{4}[AEIW]:/	contained	contains=olTrcMsgId	nextgroup=olText	skipwhite
 syn match olTrcMsgId	/\v \w+:/					contained
 syn match olText	/\v.*$/						contained	contains=olHexData
 
