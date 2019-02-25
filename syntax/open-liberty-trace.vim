@@ -20,8 +20,11 @@ syn case ignore
 " Define the standard Liberty trace line
 " [timestamp] thread objectid component loglevel [trace msg id: ]text
 syn match olTimestamp	/\v^\[[^\]]*\]/										nextgroup=olThread	skipwhite
-syn match olThread	/\v[^ ]+/					contained				nextgroup=olObjectId	skipwhite
-syn match olObjectId	/\v[^ ]+/					contained				nextgroup=olComponent	skipwhite
+" match the thread id and expect the object id next
+syn match olThread	/\v\x{8}/					contained				nextgroup=olObjectId	skipwhite
+" match the thread id NOT FOLLOWED BY object id (default messages.log format)
+syn match olThread	/\v\x{8} (id\=\x{8})@!/				contained				nextgroup=olComponent	skipwhite
+syn match olObjectId	/\vid=[^ ]+/					contained				nextgroup=olComponent	skipwhite
 syn match olComponent	/\v[^ ]+/					contained				nextgroup=olLogLevel	skipwhite
 syn match olLogLevel	/\v[^ ]/					contained				nextgroup=olText	skipwhite
 syn match olLogLevel	/\v[AEIW] [A-Z]{2,5}[0-9]{4}[AEIW]:/		contained	contains=olTrcMsgId	nextgroup=olText	skipwhite
@@ -29,7 +32,7 @@ syn match olTrcMsgId	/\v \w+:/					contained
 syn match olText	/\v.*$/						contained	contains=olHexData
 
 " and try to capture any additional traced items
-syn match olTextCont	/\v^(\[[^\]]*\])@!.*/						contains=olMsgDir,olMsgType,olMsgAttr,olHexIndex,olHexData,olStack
+syn match olTextCont	/\v^(\[[^\]]*\])@!.*/						contains=olMsgDir,olMsgType,olMsgAttr,olHexIndex,olHexData
 " match indented continuation lines as Liberty trace text
 syn match olIndented	/\v^ {100}.*$/							contains=olText
 " match the pre-amble (note: this must come AFTER olTextCont to supersede it)
@@ -59,7 +62,8 @@ syn match olHexData	/\v(\@)@<=[0-9A-F]{4,}/				contained
 syn match olHexData	/\v(\=)@<=[0-9A-F]{10,}([[:alnum:]])@!/		contained
 
 " treat stack trace lines specially
-syn match olStack	/^[[:blank:]]*at .*(.*)$/			
+syn match olStack	/\vat [^ \.(]+(\.[^ \.(]+)+\((.*:\d+|Native Method)\)$/
+syn match olStack	/\v\.\.\. \d+ more$/
 
 " indicate how to highlight each bit of Liberty trace
 hi def link olProperty	Define
