@@ -23,18 +23,18 @@ syn match olTimestamp	/\v^\[[^\]]*\]/										nextgroup=olThread	skipwhite
 " match the thread id and expect the object id next
 syn match olThread	/\v\x{8}/					contained				nextgroup=olObjectId	skipwhite
 " match the thread id NOT FOLLOWED BY object id (default messages.log format)
-syn match olThread	/\v\x{8} (id\=\x{8})@!/				contained				nextgroup=olComponent	skipwhite
-syn match olObjectId	/\vid=[^ ]+/					contained				nextgroup=olComponent	skipwhite
+syn match olThread	/\v\x{8} (id\=.{8} )@!/				contained				nextgroup=olComponent	skipwhite
+syn match olObjectId	/\vid=[^ ]*/					contained				nextgroup=olComponent	skipwhite
 syn match olComponent	/\v[^ ]+/					contained				nextgroup=olLogLevel	skipwhite
 " match log level as a single character
 syn match olLogLevel	/\v[^ ]/					contained				nextgroup=olText	skipwhite
 " alternatively, match log level as a single character followed by a msg id
-syn match olLogLevel	/\v[AEIW] +[A-Z0-9]{2,5}[0-9]{4}[AEIW]:/	contained	contains=olTrcMsgId	nextgroup=olText	skipwhite
-syn match olTrcMsgId	/\v \w+:/					contained
-syn match olText	/\v.*$/						contained	contains=olHexData
+syn match olLogLevel	/\v[AEIW] +[A-Z0-9]{2,5}[0-9]{4}[AEIW]:/	contained	contains=olTrcId	nextgroup=olText	skipwhite
+syn match olTrcId	/\v \w+:/					contained
+syn match olText	/\v.*$/						contained	contains=olHexData,olStack
 
 " and try to capture any additional traced items
-syn match olTextCont	/\v^(\[[^\]]*\])@!.*/						contains=olMsgDir,olMsgType,olMsgAttr,olHexIndex,olHexData
+syn match olTextCont	/\v^(\[[^\]]*\])@!.*/						contains=olMsgDir,olMsgType,olMsgAttr,olHexIndex,olHexData,olStack
 " match indented continuation lines as Liberty trace text
 syn match olIndented	/\v^ {100}.*$/							contains=olText
 " match the pre-amble (note: this must come AFTER olTextCont to supersede it)
@@ -77,7 +77,7 @@ hi def link olLogLevel	Operator
 hi def link olIndent	Ignore
 hi def link olText	Comment
 hi def link olTextCont	Comment
-hi def link olTrcMsgId	Constant
+hi def link olTrcId	Constant
 hi def link olMsgDir	Underlined
 hi def link olMsgType	Constant
 hi def link olMsgAttr	Identifier
