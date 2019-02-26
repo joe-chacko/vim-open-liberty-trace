@@ -18,20 +18,31 @@ syntax clear
 syn case ignore
 
 " Define the standard Liberty trace line
-" [timestamp] thread objectid component loglevel [trace msg id: ]text
-syn match olTimestamp	/\v^\[[^\]]*\]/										nextgroup=olThread	skipwhite
+" [timestamp] thread objectid component loglevel [trace msg key: ]text
+syn match olTimestamp	/\v^\[[^\]]*\]/									nextgroup=olThread	skipwhite
 " match the thread id and expect the object id next
-syn match olThread	/\v\x{8}/					contained				nextgroup=olObjectId	skipwhite
+syn match olThread	/\v\x{8}/				contained				nextgroup=olObjectId	skipwhite
 " match the thread id NOT FOLLOWED BY object id (default messages.log format)
-syn match olThread	/\v\x{8} (id\=.{8} )@!/				contained				nextgroup=olComponent	skipwhite
-syn match olObjectId	/\vid=[^ ]*/					contained				nextgroup=olComponent	skipwhite
-syn match olComponent	/\v[^ ]+/					contained				nextgroup=olLogLevel	skipwhite
+syn match olThread	/\v\x{8} (id\=.{8} )@!/			contained				nextgroup=olComponent	skipwhite
+syn match olObjectId	/\vid=[^ ]*/				contained				nextgroup=olComponent	skipwhite
+syn match olComponent	/\v[^ ]+/				contained				nextgroup=olLogLevel	skipwhite
 " match log level as a single character
-syn match olLogLevel	/\v[^ ]/					contained				nextgroup=olText	skipwhite
+syn match olLogLevel	/\v[^ ]/				contained				nextgroup=olText	skipwhite
 " alternatively, match log level as a single character followed by a msg id
-syn match olLogLevel	/\v[AEIW] +[A-Z0-9]{2,5}[0-9]{4}[AEIW]:/	contained	contains=olTrcId	nextgroup=olText	skipwhite
-syn match olTrcId	/\v \w+:/					contained
-syn match olText	/\v.*$/						contained	contains=olHexData,olStack
+syn match olLogLevel	/\vI +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olInfo,olKey	nextgroup=olTextInfo	skipwhite
+syn match olLogLevel	/\vA +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olAudit,olKey	nextgroup=olTextAudit	skipwhite
+syn match olLogLevel	/\vW +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olWarn,olKey	nextgroup=olTextWarn	skipwhite
+syn match olLogLevel	/\vE +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olError,olKey	nextgroup=olTextError	skipwhite
+syn match olInfo	/I/					contained
+syn match olAudit	/A/					contained
+syn match olWarn	/W/					contained
+syn match olError	/E/					contained
+syn match olKey		/\v +\w+:/				contained
+syn match olText	/\v.*$/					contained	contains=olHexData,olStack			skipWhite
+syn match olTextInfo	/\v.*$/					contained	contains=olHexData,olStack
+syn match olTextAudit	/\v.*$/					contained	contains=olHexData,olStack
+syn match olTextWarn	/\v.*$/					contained	contains=olHexData,olStack
+syn match olTextError	/\v.*$/					contained	contains=olHexData,olStack
 
 " and try to capture any additional traced items
 syn match olTextCont	/\v^(\[[^\]]*\])@!.*/						contains=olMsgDir,olMsgType,olMsgAttr,olHexIndex,olHexData,olStack
@@ -77,7 +88,7 @@ hi def link olLogLevel	Operator
 hi def link olIndent	Ignore
 hi def link olText	Comment
 hi def link olTextCont	Comment
-hi def link olTrcId	Constant
+hi def link olKey	Constant
 hi def link olMsgDir	Underlined
 hi def link olMsgType	Constant
 hi def link olMsgAttr	Identifier
@@ -86,6 +97,14 @@ hi def link olHexData	Number
 hi def link olHexAscii	Comment
 hi def link olValueTag	Underlined
 hi def link olPadding	Ignore
+hi def link olInfo	Underlined
+hi def link olTextInfo	Underlined
+hi def link olAudit	CursorIM
+hi def link olTextAudit	CursorIM
+hi def link olWarn	Todo
+hi def link olTextWarn	Todo
+hi def link olError	Error
+hi def link olTextError	Error
 hi def link olStack	Error
 
 
