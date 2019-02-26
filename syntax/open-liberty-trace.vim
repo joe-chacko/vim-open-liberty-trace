@@ -28,6 +28,8 @@ syn match olObjectId	/\vid=[^ ]*/				contained				nextgroup=olComponent	skipwhit
 syn match olComponent	/\v[^ ]+/				contained				nextgroup=olLogLevel	skipwhite
 " match log level as a single character
 syn match olLogLevel	/\v[^ ]/				contained				nextgroup=olText	skipwhite
+" special processing if the log level is "R" (for raw?)
+syn match olLogLevel	/\vR   /				contained				nextgroup=olTextRaw	skipwhite
 " alternatively, match log level as a single character followed by a msg id
 syn match olLogLevel	/\vI +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olInfo,olKey	nextgroup=olTextInfo	skipwhite
 syn match olLogLevel	/\vA +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olAudit,olKey	nextgroup=olTextAudit	skipwhite
@@ -38,7 +40,8 @@ syn match olAudit	/A/					contained
 syn match olWarn	/W/					contained
 syn match olError	/E/					contained
 syn match olKey		/\v +\w+:/				contained
-syn match olText	/\v.*$/					contained	contains=olHexData,olStack			skipWhite
+syn match olTextRaw	/\v.*$/					contained	contains=olHexData,olStack
+syn match olText	/\v.*$/					contained	contains=olHexData,olStack
 syn match olTextInfo	/\v.*$/					contained	contains=olHexData,olStack
 syn match olTextAudit	/\v.*$/					contained	contains=olHexData,olStack
 syn match olTextWarn	/\v.*$/					contained	contains=olHexData,olStack
@@ -87,16 +90,9 @@ hi def link olComponent	Type
 hi def link olLogLevel	Operator
 hi def link olIndent	Ignore
 hi def link olText	Comment
+hi def link olTextRaw	ToolbarButton
 hi def link olTextCont	Comment
 hi def link olKey	Constant
-hi def link olMsgDir	Underlined
-hi def link olMsgType	Constant
-hi def link olMsgAttr	Identifier
-hi def link olHexIndex	Label
-hi def link olHexData	Number
-hi def link olHexAscii	Comment
-hi def link olValueTag	Underlined
-hi def link olPadding	Ignore
 hi def link olInfo	Underlined
 hi def link olTextInfo	Underlined
 hi def link olAudit	CursorIM
@@ -107,5 +103,13 @@ hi def link olError	Error
 hi def link olTextError	Error
 hi def link olStack	Error
 
+hi def link olMsgDir	Underlined
+hi def link olMsgType	Constant
+hi def link olMsgAttr	Identifier
+hi def link olHexIndex	Label
+hi def link olHexData	Number
+hi def link olHexAscii	Comment
+hi def link olValueTag	Underlined
+hi def link olPadding	Ignore
 
 
