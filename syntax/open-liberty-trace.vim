@@ -18,8 +18,14 @@ syntax clear
 syn case ignore
 
 " Define the standard Liberty trace line
-" [timestamp] thread objectid component loglevel [trace msg key: ]text
+" [timestamp] thread [objectid] component loglevel [trace msg key: ]text
+" And the Simplicty FAT output.txt trace line
+" [timestamp] thread class method loglevel text
 syn match olTimestamp	/\v^\[[^\]]*\]/									nextgroup=olThread	skipwhite
+" match the thread id for Simplicity FAT trace
+syn match olThread	/\v\x{3}/				contained				nextgroup=olFATClass	skipwhite
+syn match olFATClass	/\v[^ ]+/				contained				nextgroup=olFATMethod	skipwhite
+syn match olFATMethod	/\v[^ ]+/				contained				nextgroup=olLogLevel	skipwhite
 " match the thread id and expect the object id next
 syn match olThread	/\v\x{8}/				contained				nextgroup=olObjectId	skipwhite
 " match the thread id NOT FOLLOWED BY object id (default messages.log format)
@@ -28,19 +34,27 @@ syn match olObjectId	/\vid=[^ ]*/				contained				nextgroup=olComponent	skipwhit
 syn match olComponent	/\v[^ ]+/				contained				nextgroup=olLogLevel	skipwhite
 " match log level as a single character
 syn match olLogLevel	/\v[^ ]/				contained				nextgroup=olText	skipwhite
-" special processing if the log level is "R" (for raw?)
-syn match olLogLevel	/\vR   /				contained				nextgroup=olTextRaw	skipwhite
-" alternatively, match log level as a single character followed by a msg id
+" add special processing if the log level is O,R,I,A,W,E
+syn match olLogLevel	/\vO /					contained	contains=olOut		nextgroup=olStdOut	skipwhite
+syn match olLogLevel	/\vR /					contained	contains=olErr		nextgroup=olStdErr	skipwhite
+syn match olLogLevel	/\vI /					contained	contains=olInfo		nextgroup=olTextInfo	skipwhite
+syn match olLogLevel	/\vA /					contained	contains=olAudit	nextgroup=olTextAudit	skipwhite
+syn match olLogLevel	/\vW /					contained	contains=olWarn		nextgroup=olTextWarn	skipwhite
+syn match olLogLevel	/\vE /					contained	contains=olError	nextgroup=olTextError	skipwhite
+" additionally try to match log level as a single character followed by a msg id
 syn match olLogLevel	/\vI +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olInfo,olKey	nextgroup=olTextInfo	skipwhite
 syn match olLogLevel	/\vA +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olAudit,olKey	nextgroup=olTextAudit	skipwhite
 syn match olLogLevel	/\vW +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olWarn,olKey	nextgroup=olTextWarn	skipwhite
 syn match olLogLevel	/\vE +[A-Z0-9]{2,5}[0-9]{4}[AEIW]: /	contained	contains=olError,olKey	nextgroup=olTextError	skipwhite
+syn match olOut		/O/					contained
+syn match olErr		/R/					contained
 syn match olInfo	/I/					contained
 syn match olAudit	/A/					contained
 syn match olWarn	/W/					contained
 syn match olError	/E/					contained
 syn match olKey		/\v +\w+:/				contained
-syn match olTextRaw	/\v.*$/					contained	contains=olHexData,olStack
+syn match olStdOut	/\v.*$/					contained	contains=olHexData,olStack
+syn match olStdErr	/\v.*$/					contained	contains=olHexData,olStack
 syn match olText	/\v.*$/					contained	contains=olHexData,olStack
 syn match olTextInfo	/\v.*$/					contained	contains=olHexData,olStack
 syn match olTextAudit	/\v.*$/					contained	contains=olHexData,olStack
@@ -52,7 +66,7 @@ syn match olTextCont	/\v^(\[[^\]]*\])@!.*/						contains=olMsgDir,olMsgType,olMs
 " match indented continuation lines as Liberty trace text
 syn match olIndented	/\v^ {100}.*$/							contains=olText
 " match the pre-amble (note: this must come AFTER olTextCont to supersede it)
-syn region olPrologue	start=/\v^\*{80}/ end=/\v^\*{80}/ 				contains=olProperty
+syn region olPrologue	start=/\v^\*{80}/ end=/\v^\*{80}/				contains=olProperty
 syn match olProperty	/\v^[^ ]+ = .*$/				contained
 
 
@@ -61,10 +75,10 @@ syn match olMsgDir	/\v(IN COMING|OUT GOING):/			contained
 syn match olMsgType	/\v^(\w+ ){1,2}Message$/			contained
 syn match olMsgAttr	/\v(Date|Thread Info|GIOP Version|Byte order):/	contained
 syn match olMsgAttr	/\v(Local|Remote) (Port|IP):/			contained
-syn match olMsgAttr	/\v(Message size|Request ID|Reply Status):/ 	contained
-syn match olMsgAttr	/\v(Data Offset|Object Key|Operation):/ 	contained
-syn match olMsgAttr	/\v(Fragment to follow|Response Flag):/ 	contained
-syn match olMsgAttr	/\v(Service Context|Target Address):/ 		contained
+syn match olMsgAttr	/\v(Message size|Request ID|Reply Status):/	contained
+syn match olMsgAttr	/\v(Data Offset|Object Key|Operation):/		contained
+syn match olMsgAttr	/\v(Fragment to follow|Response Flag):/		contained
+syn match olMsgAttr	/\v(Service Context|Target Address):/		contained
 syn match olHexIndex	/\v^[0-9A-F]{4}:/				contained
 syn match olHexData	/\v[0-9A-F][0-9A-F ]{7} ([0-9A-F ]{8} ){3}/	contained	contains=olValueTag,olPadding
 syn match olValueTag	/\v7FFFFF[0-9A-F]{2}/
@@ -86,13 +100,18 @@ hi def link olProperty	Define
 hi def link olTimestamp	Label
 hi def link olThread	Constant
 hi def link olObjectId	Macro
-hi def link olComponent	Type
 hi def link olLogLevel	Operator
+hi def link olComponent	Type
+hi def link olFATClass	Type
+hi def link olFATMethod	Identifier
 hi def link olIndent	Ignore
 hi def link olText	Comment
-hi def link olTextRaw	ToolbarButton
 hi def link olTextCont	Comment
 hi def link olKey	Constant
+hi def link olOut	StatusLineTerm
+hi def link olStdOut	StatusLineTerm
+hi def link olErr	ToolbarButton
+hi def link olStdErr	ToolbarButton
 hi def link olInfo	Underlined
 hi def link olTextInfo	Underlined
 hi def link olAudit	CursorIM
