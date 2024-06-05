@@ -10,7 +10,7 @@ Installing
 ^^^^^^^^^^
 
 Once you have Vundle_ installed, add this bundle by adding a line like this to your ``.vimrc``::
-    Bundle 'chackoj/vim-open-liberty-trace'
+    Bundle 'joe-chacko/vim-open-liberty-trace'
 Then run ``:PluginUpdate`` from within Vim_.
 
 These instruction may be out of date. Please refer to the Vundle_ documentation.
